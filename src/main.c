@@ -6,7 +6,7 @@
 /*   By: yyudi <yyudi@student.42heilbronn.de>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 03:23:50 by yyudi             #+#    #+#             */
-/*   Updated: 2025/08/18 03:23:51 by yyudi            ###   ########.fr       */
+/*   Updated: 2025/08/24 14:55:21 by yyudi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ int	main(int ac, char **av)
 		return (1);
 	}
 	if (init_app(&a, av[1]))
-		return (1);
+		return (app_cleanup(&a),1);
 	mlx_loop_hook(a.mlx, render_loop, &a);
 	mlx_loop(a.mlx);
 	app_cleanup(&a);

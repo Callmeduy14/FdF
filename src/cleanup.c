@@ -6,7 +6,7 @@
 /*   By: yyudi <yyudi@student.42heilbronn.de>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/08/18 01:39:56 by yyudi             #+#    #+#             */
-/*   Updated: 2025/08/18 01:39:57 by yyudi            ###   ########.fr       */
+/*   Updated: 2025/08/24 14:54:55 by yyudi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,6 @@ void	app_cleanup(t_app *a)
 {
 	if (!a)
 		return ;
-	if (a->img)
-		mlx_delete_image(a->mlx, a->img);
 	if (a->mlx)
 		mlx_terminate(a->mlx);
 	free_map(&a->map);
