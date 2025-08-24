@@ -5,60 +5,57 @@
 /*                                                    +:+ +:+         +:+     */
 /*   By: yyudi <yyudi@student.42heilbronn.de>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/09 18:35:53 by yyudi             #+#    #+#             */
-/*   Updated: 2025/08/09 20:30:34 by yyudi            ###   ########.fr       */
+/*   Created: 2025/08/18 03:23:50 by yyudi             #+#    #+#             */
+/*   Updated: 2025/08/18 03:23:51 by yyudi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/push_swap.h"
+#include "fdf.h"
 
-static void	end_ok(t_stack *a, t_stack *b)
+static double	update_time_and_flag(t_app *a, double last)
 {
-	stack_clear(a);
-	stack_clear(b);
+	double	now;
+	double	dt;
+
+	now = mlx_get_time();
+	if (last == 0.0)
+		dt = 1.0 / 60.0;
+	else
+		dt = now - last;
+	if (a->anim_on)
+	{
+		a->time += (float)dt;
+		a->needs_redraw = 1;
+	}
+	return (now);
 }
 
-static int	handle_small(t_stack *a, t_stack *b)
+void	render_loop(void *param)
 {
-	if (is_sorted(a))
-	{
-		end_ok(a, b);
-		return (1);
-	}
-	if (a->size <= 3)
-	{
-		sort_three(a);
-		end_ok(a, b);
-		return (1);
-	}
-	if (a->size <= 5)
-	{
-		sort_five(a, b);
-		end_ok(a, b);
-		return (1);
-	}
-	return (0);
+	static double	last = 0.0;
+	t_app			*a;
+
+	a = (t_app *)param;
+	last = update_time_and_flag(a, last);
+	if (!a->needs_redraw)
+		return ;
+	a->needs_redraw = 0;
+	render_scene(a);
 }
 
 int	main(int ac, char **av)
 {
-	t_stack	a;
-	t_stack	b;
+	t_app	a;
 
-	stack_init(&a, 'a');
-	stack_init(&b, 'b');
-	if (ac == 1)
-		return (0);
-	if (!parse_args(ac, av, &a))
+	if (ac != 2)
 	{
-		end_ok(&a, &b);
-		die_error();
+		write(2, "usage: ./fdf map.fdf\n", 22);
+		return (1);
 	}
-	if (handle_small(&a, &b))
-		return (0);
-	index_compress(&a);
-	mark_lis_keep(&a);
-	solve(&a, &b);
-	end_ok(&a, &b);
+	if (init_app(&a, av[1]))
+		return (1);
+	mlx_loop_hook(a.mlx, render_loop, &a);
+	mlx_loop(a.mlx);
+	app_cleanup(&a);
 	return (0);
 }

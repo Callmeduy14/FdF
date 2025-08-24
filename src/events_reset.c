@@ -1,38 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   checker_swap.c                                     :+:      :+:    :+:   */
+/*   events_reset.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yyudi <yyudi@student.42heilbronn.de>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/09 19:20:51 by yyudi             #+#    #+#             */
-/*   Updated: 2025/08/11 09:38:15 by yyudi            ###   ########.fr       */
+/*   Created: 2025/08/18 01:57:47 by yyudi             #+#    #+#             */
+/*   Updated: 2025/08/23 11:52:20 by yyudi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/push_swap.h"
+#include "fdf.h"
 
-static void	swap_top_two(t_stack *s)
+void	handle_reset_key(mlx_key_data_t k, t_app *a)
 {
-	t_node	*a;
-	t_node	*b;
-
-	if (s->size < 2)
-		return ;
-	a = s->top;
-	b = a->next;
-	a->next = b->next;
-	if (b->next)
-		b->next->prev = a;
-	else
-		s->bot = a;
-	b->prev = NULL;
-	b->next = a;
-	a->prev = b;
-	s->top = b;
+	if (k.key == MLX_KEY_R)
+	{
+		init_cam(&a->cam);
+		set_pivot_center(a);
+		fit_to_view(a);
+		a->needs_redraw = 1;
+	}
 }
 
-void	ch_swap(t_stack *s)
+void	set_pivot_center(t_app *a)
 {
-	swap_top_two(s);
+	a->cam.pivot_x = ((float)(a->map.w - 1)) * 0.5f;
+	a->cam.pivot_y = ((float)(a->map.h - 1)) * 0.5f;
+	a->cam.pivot_z = 0.0f;
 }

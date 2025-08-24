@@ -1,53 +1,49 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lis_mark_utils.c                                   :+:      :+:    :+:   */
+/*   cleanup.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: yyudi <yyudi@student.42heilbronn.de>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/08/09 19:54:07 by yyudi             #+#    #+#             */
-/*   Updated: 2025/08/09 19:54:08 by yyudi            ###   ########.fr       */
+/*   Created: 2025/08/18 01:39:56 by yyudi             #+#    #+#             */
+/*   Updated: 2025/08/18 01:39:57 by yyudi            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../include/push_swap.h"
+#include "fdf.h"
 
-static t_node	*node_at(t_stack *a, int pos)
+void	free_map(t_map *m)
 {
-	t_node	*n;
-	int		i;
+	int	i;
 
-	n = a->top;
+	if (!m || !m->z)
+		return ;
 	i = 0;
-	while (n && i < pos)
+	while (i < m->h)
 	{
-		n = n->next;
+		free(m->z[i]);
 		i++;
 	}
-	return (n);
+	free(m->z);
+	m->z = 0;
 }
 
-void	lis_clear_marks(t_stack *a)
+void	app_cleanup(t_app *a)
 {
-	t_node	*n;
-
-	n = a->top;
-	while (n)
-	{
-		n->lis_keep = 0;
-		n = n->next;
-	}
+	if (!a)
+		return ;
+	if (a->img)
+		mlx_delete_image(a->mlx, a->img);
+	if (a->mlx)
+		mlx_terminate(a->mlx);
+	free_map(&a->map);
 }
 
-void	lis_mark_backtrack(t_stack *a, int *prev, int i)
+void	panic(t_app *a, const char *msg, int err)
 {
-	t_node	*n;
-
-	while (i != -1)
-	{
-		n = node_at(a, i);
-		if (n)
-			n->lis_keep = 1;
-		i = prev[i];
-	}
+	if (msg)
+		write(2, msg, (int)ft_strlen(msg));
+	app_cleanup(a);
+	if (err)
+		exit(err);
 }
