@@ -1,97 +1,78 @@
-# =============================
-# FdF — Build with MLX42 (GLFW)
-# MLX42 di luar include/, libft di include/libft
-# =============================
+NAME        = push_swap
+BONUS       = checker
+CC          = cc
+CFLAGS      = -Wall -Wextra -Werror
+RM          = rm -f
 
-NAME        := fdf
-CC          := cc
-CFLAGS      := -Wall -Wextra -Werror
+SRC_DIR     = src
+BONUS_DIR   = src/bonus
+INC_DIR     = include
+OBJ_DIR     = obj
 
-# ---- Directories ----
-SRC_DIR     := src
-INC_DIR     := include
-LIBFT_DIR   := include/libft
-MLX42_DIR   := mlx42
-MLX42_REPO  := https://github.com/codam-coding-college/MLX42.git
+LIBFT_DIR   = include/libft
+LIBFT_A     = $(LIBFT_DIR)/libft.a
 
-# ---- Includes (PASTIKAN TIDAK ADA SPASI NYASAR) ----
-INC         := -I$(INC_DIR) -I$(LIBFT_DIR) -I$(MLX42_DIR)/include
 
-# ---- Sources ----
-SRC := \
-	$(SRC_DIR)/main.c \
-	$(SRC_DIR)/parser.c \
-	$(SRC_DIR)/project_iso.c \
-	$(SRC_DIR)/render.c \
-	$(SRC_DIR)/draw_line.c \
-	$(SRC_DIR)/events.c \
-	$(SRC_DIR)/cleanup.c \
-	$(SRC_DIR)/strarr_utils.c
+SRCS = \
+    $(SRC_DIR)/main.c \
+    $(SRC_DIR)/parse.c \
+    $(SRC_DIR)/stack.c \
+    $(SRC_DIR)/ops_swap.c \
+    $(SRC_DIR)/ops_push.c \
+    $(SRC_DIR)/ops_rotate.c \
+    $(SRC_DIR)/ops_revrotate.c \
+	$(SRC_DIR)/lis_index.c \
+    $(SRC_DIR)/lis_mark.c \
+	$(SRC_DIR)/lis_mark_utils.c \
+    $(SRC_DIR)/solver.c \
+    $(SRC_DIR)/cost_target.c \
+	$(SRC_DIR)/cost_exec.c\
+	$(SRC_DIR)/cost_calc.c\
+    $(SRC_DIR)/utils.c \
+    $(SRC_DIR)/tiny.c\
+	$(SRC_DIR)/errors.c
 
-BONUS := \
-	$(SRC_DIR)/anim_bonus.c \
-	$(SRC_DIR)/shade_bonus.c
+BONUS_SRCS = \
+    $(BONUS_DIR)/checker_main.c \
+    $(BONUS_DIR)/checker_ops.c \
+    $(BONUS_DIR)/checker_rotate.c \
+	$(BONUS_DIR)/checker_swap.c
 
-OBJ  := $(SRC:.c=.o)
-BOBJ := $(BONUS:.c=.o)
+OBJS       = $(SRCS:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+BONUS_OBJS = $(BONUS_SRCS:$(BONUS_DIR)/%.c=$(OBJ_DIR)/bonus_%.o)
 
-# ---- Libs ----
-LIBFT_A     := $(LIBFT_DIR)/libft.a
-MLX42_LIB   := $(MLX42_DIR)/build/libmlx42.a
+OBJS_NO_MAIN := $(filter-out $(OBJ_DIR)/main.o, $(OBJS))
 
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-	LIBS  := -lglfw -framework Cocoa -framework OpenGL -framework IOKit
-	RPATH := -Wl,-rpath,$(MLX42_DIR)/build
-endif
-ifeq ($(UNAME_S),Linux)
-	LIBS  := -lglfw -lGL -ldl -lm -lpthread
-	RPATH := -Wl,-rpath,$(MLX42_DIR)/build
-endif
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c $(INC_DIR)/push_swap.h
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
 
-# =============================
-# Rules
-# =============================
+$(OBJ_DIR)/bonus_%.o: $(BONUS_DIR)/%.c $(INC_DIR)/push_swap.h
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -I$(INC_DIR) -c $< -o $@
 
-all: clone_mlx42 $(NAME)
+all: $(NAME)
 
-$(NAME): $(OBJ) $(LIBFT_A) $(MLX42_LIB)
-	$(CC) $(CFLAGS) $(OBJ) $(LIBFT_A) $(MLX42_LIB) $(LIBS) $(RPATH) -o $(NAME)
+$(NAME): $(OBJS) $(LIBFT_A)
+	$(CC) $(CFLAGS) $(OBJS) -I$(INC_DIR) $(LIBFT_A) -o $(NAME)
 
-bonus: $(OBJ) $(BOBJ) $(LIBFT_A) $(MLX42_LIB)
-	$(CC) $(CFLAGS) -DBONUS $(OBJ) $(BOBJ) $(LIBFT_A) $(MLX42_LIB) $(LIBS) $(RPATH) -o $(NAME)
+$(BONUS): $(BONUS_OBJS) $(OBJS_NO_MAIN) $(LIBFT_A)
+	$(CC) $(CFLAGS) $(BONUS_OBJS) $(OBJS_NO_MAIN) -I$(INC_DIR) $(LIBFT_A) -o $(BONUS)
 
-# ---- Fetch & build MLX42 ----
-clone_mlx42:
-	@if [ ! -d "$(MLX42_DIR)/.git" ]; then \
-		echo "Cloning MLX42 into $(MLX42_DIR) ..."; \
-		git clone $(MLX42_REPO) $(MLX42_DIR); \
-	else \
-		echo "MLX42 already cloned."; \
-	fi
-
-$(MLX42_LIB): clone_mlx42
-	@echo "Building MLX42 with CMake ..."
-	@cmake -B $(MLX42_DIR)/build -S $(MLX42_DIR)
-	@cmake --build $(MLX42_DIR)/build
-
-# ---- Build libft ----
 $(LIBFT_A):
 	$(MAKE) -C $(LIBFT_DIR)
 
-# ---- Objects ----
-%.o: %.c
-	$(CC) $(CFLAGS) $(INC) -c $< -o $@
+bonus: $(BONUS)
 
-# ---- Cleaning ----
 clean:
+	$(RM) -r $(OBJ_DIR)
 	$(MAKE) -C $(LIBFT_DIR) clean
-	rm -f $(OBJ) $(BOBJ)
 
 fclean: clean
-	$(MAKE) -C $(LIBFT_DIR) fclean
-	rm -f $(NAME)
+	$(RM) $(NAME) $(BONUS) $(LIBFT_A)
 
-re: fclean all
+re:
+	$(MAKE) fclean
+	$(MAKE) all
 
-.PHONY: all bonus clean fclean re clone_mlx42
+.PHONY: all clean fclean re bonus
